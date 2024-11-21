@@ -144,10 +144,7 @@ jobs:
         FIRMWARE_PATH=openwrt/bin/targets/armvirt/64
         [ -d $FIRMWARE_PATH ] || mkdir -p $FIRMWARE_PATH
         cd $FIRMWARE_PATH
-        wget -q $(curl -s "https://api.github.com/repos/$GITHUB_REPOSITORY/releases" | grep "$RELEASE_TAG.*rootfs.tar.gz" | awk -F '"' '{print $4}')
-        wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/build.config
-        wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/config.buildinfo
-        wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/packages.tar.gz
+        wget -q $(curl -sL api.github.com/repos/$GITHUB_REPOSITORY/releases | grep $RELEASE_TAG/ | awk -F '"' '{print $4}' | grep -v img.gz)
         echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
 
