@@ -42,7 +42,7 @@ git_clone() {
         repo_url="$2"
         shift 2
     fi
-    local target_dir current_dir destination_dir
+    local target_dir current_dir
     if [[ -n "$@" ]]; then
         target_dir="$@"
     else
@@ -54,13 +54,10 @@ git_clone() {
     }
     rm -rf $target_dir/{.git*,README*.md,LICENSE}
     current_dir=$(_find "package/ feeds/ target/" "$target_dir")
-    if [[ -d "$current_dir" ]]; then
-        rm -rf $current_dir
+    if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
         mv -f $target_dir ${current_dir%/*}
         echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | _printf
     else
-        destination_dir="package/A"
-        [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
         mv -f $target_dir $destination_dir
         echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | _printf
     fi
@@ -83,20 +80,17 @@ clone_dir() {
         return 0
     }
     for target_dir in "$@"; do
-        local source_dir current_dir destination_dir
+        local source_dir current_dir
         source_dir=$(_find "$temp_dir" "$target_dir")
         [[ -d "$source_dir" ]] || {
             echo -e "$(color cr 查找) $target_dir [ $(color cr ✕) ]" | _printf
             continue
         }
         current_dir=$(_find "package/ feeds/ target/" "$target_dir")
-        if [[ -d "$current_dir" ]]; then
-            rm -rf $current_dir
+        if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
             mv -f $source_dir ${current_dir%/*}
             echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | _printf
         else
-            destination_dir="package/A"
-            [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
             mv -f $source_dir $destination_dir
             echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | _printf
         fi
@@ -121,22 +115,23 @@ clone_all() {
         return 0
     }
     for target_dir in $(ls -l $temp_dir/$@ | awk '/^d/{print $NF}'); do
-        local source_dir current_dir destination_dir
+        local source_dir current_dir
         source_dir=$(_find "$temp_dir" "$target_dir")
         current_dir=$(_find "package/ feeds/ target/" "$target_dir")
-        if [[ -d "$current_dir" ]]; then
-            rm -rf $current_dir
+        if ([[ -d "$current_dir" ]] && rm -rf $current_dir); then
             mv -f $source_dir ${current_dir%/*}
             echo -e "$(color cg 替换) $target_dir [ $(color cg ✔) ]" | _printf
         else
-            destination_dir="package/A"
-            [[ -d "$destination_dir" ]] || mkdir -p $destination_dir
             mv -f $source_dir $destination_dir
             echo -e "$(color cb 添加) $target_dir [ $(color cb ✔) ]" | _printf
         fi
     done
     rm -rf $temp_dir
 }
+
+# 创建插件保存目录
+destination_dir="package/A"
+[[ -d "$destination_dir" ]] || mkdir -p $destination_dir
 
 color cy "添加&替换插件"
 # 添加额外插件
@@ -156,9 +151,9 @@ git_clone https://github.com/jerrykuku/luci-app-argon-config
 
 # 晶晨宝盒
 clone_all https://github.com/ophub/luci-app-amlogic
-sed -i "s|firmware_repo.*|firmware_repo 'https://github.com/$GITHUB_REPOSITORY'|g" package/A/luci-app-amlogic/root/etc/config/amlogic
-# sed -i "s|kernel_path.*|kernel_path 'https://github.com/ophub/kernel'|g" package/A/luci-app-amlogic/root/etc/config/amlogic
-sed -i "s|ARMv8|$RELEASE_TAG|g" package/A/luci-app-amlogic/root/etc/config/amlogic
+sed -i "s|firmware_repo.*|firmware_repo 'https://github.com/$GITHUB_REPOSITORY'|g" $destination_dir/luci-app-amlogic/root/etc/config/amlogic
+# sed -i "s|kernel_path.*|kernel_path 'https://github.com/ophub/kernel'|g" $destination_dir/luci-app-amlogic/root/etc/config/amlogic
+sed -i "s|ARMv8|$RELEASE_TAG|g" $destination_dir/luci-app-amlogic/root/etc/config/amlogic
 
 # HomeProxy
 git_clone https://github.com/immortalwrt/homeproxy luci-app-homeproxy
@@ -202,7 +197,7 @@ sed -i 's/root:::0:99999:7:::/root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.::0:99999:7
 cp -f $GITHUB_WORKSPACE/images/bg1.jpg feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
 
 # 取消主题默认设置
-# find package/A/luci-theme-*/ -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
+# find $destination_dir/luci-theme-*/ -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
 
 # 调整 netdata 到 状态 菜单
 sed -i 's/system/status/g' feeds/luci/applications/luci-app-netdata/luasrc/controller/netdata.lua
