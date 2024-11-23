@@ -122,7 +122,7 @@ jobs:
         DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
         echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
         KERNEL=$(grep -oP 'KERNEL_PATCHVER:=\K[^ ]+' target/linux/$DEVICE_TARGET/Makefile)
-        KERNEL_VERSION=$(sed -n 2p include/kernel-$KERNEL | awk -F '-' '{print $2}' | awk -F ' ' '{print $1}')
+        KERNEL_VERSION=$(sed -n 2p include/kernel-$KERNEL | awk '{print $1}' | awk -F '-' '{print $2}')
         echo "KERNEL_VERSION=$KERNEL_VERSION" >> $GITHUB_ENV
 
     - name: Cache Toolchain
