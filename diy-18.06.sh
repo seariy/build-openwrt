@@ -16,15 +16,15 @@ status() {
     [[ $_date =~ [0-9]+ ]] || _date=""
     if [ $CHECK = 0 ]; then
         printf "%-62s %s %s %s %s %s %s %s\n" \
-        `echo -e "$(color cy $1) [ $(color cg ✔) ]${_date}"`
+        $(echo -e "$(color cy $1) [ $(color cg ✔) ]${_date}")
     else
         printf "%-62s %s %s %s %s %s %s %s\n" \
-        `echo -e "$(color cy $1) [ $(color cr ✕) ]${_date}"`
+        $(echo -e "$(color cy $1) [ $(color cr ✕) ]${_date}")
     fi
 }
 
 _find() {
-    find $1 -maxdepth 3 -type d -name "$2" -print -quit 2>/dev/null
+    find $1 -maxdepth 3 -type d -name $2 -print -quit 2>/dev/null
 }
 
 _printf() {
@@ -82,6 +82,8 @@ clone_dir() {
     for target_dir in "$@"; do
         local source_dir current_dir
         source_dir=$(_find "$temp_dir" "$target_dir")
+        [[ -d "$source_dir" ]] || \
+        source_dir=$(find "$temp_dir" -maxdepth 4 -type d -name "$target_dir" -print -quit) && \
         [[ -d "$source_dir" ]] || {
             echo -e "$(color cr 查找) $target_dir [ $(color cr ✕) ]" | _printf
             continue
@@ -200,11 +202,19 @@ cp -f $GITHUB_WORKSPACE/images/bg1.jpg feeds/luci/themes/luci-theme-argon/htdocs
 sed -i 's/${g}.*/${a}${b}${c}${d}${e}${f}${hydrid}/g' package/lean/autocore/files/x86/autocore
 sed -i "s/'C'/'Core '/g; s/'T '/'Thread '/g" package/lean/autocore/files/x86/autocore
 
-# 修改 Makefile
-find $destination_dir/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/luci.mk/$(TOPDIR)\/feeds\/luci\/luci.mk/g' {}
-find $destination_dir/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/lang\/golang\/golang-package.mk/$(TOPDIR)\/feeds\/packages\/lang\/golang\/golang-package.mk/g' {}
-find $destination_dir/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/PKG_SOURCE_URL:=@GHREPO/PKG_SOURCE_URL:=https:\/\/github.com/g' {}
-find $destination_dir/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/PKG_SOURCE_URL:=@GHCODELOAD/PKG_SOURCE_URL:=https:\/\/codeload.github.com/g' {}
+# 修复 Makefile 路径
+find $destination_dir/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i \
+    -e 's?\.\./\.\./luci.mk?$(TOPDIR)/feeds/luci/luci.mk?' \
+    -e 's?include \.\./\.\./\(lang\|devel\)?include $(TOPDIR)/feeds/packages/\1?' {}
+
+# 转换插件语言翻译
+for e in $(ls -d $destination_dir/luci-*/po feeds/luci/applications/luci-*/po); do
+    if [[ -d $e/zh-cn && ! -d $e/zh_Hans ]]; then
+        ln -s zh-cn $e/zh_Hans 2>/dev/null
+    elif [[ -d $e/zh_Hans && ! -d $e/zh-cn ]]; then
+        ln -s zh_Hans $e/zh-cn 2>/dev/null
+    fi
+done
 
 # 取消主题默认设置
 # find $destination_dir/luci-theme-*/ -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
@@ -227,22 +237,26 @@ sed -i 's|admin\\|admin\\/services\\|g' feeds/luci/applications/luci-app-dockerm
 status 加载个人设置
 
 # 开始下载openchash运行内核
-BEGIN_TIME=$(date '+%H:%M:%S')
-chmod +x $GITHUB_WORKSPACE/scripts/preset-clash-core.sh
-$GITHUB_WORKSPACE/scripts/preset-clash-core.sh $CLASH_KERNEL 1>/dev/null 2>&1
-status 下载openchash运行内核
+[ $CLASH_KERNEL ] && {
+    BEGIN_TIME=$(date '+%H:%M:%S')
+    chmod +x $GITHUB_WORKSPACE/scripts/preset-clash-core.sh
+    $GITHUB_WORKSPACE/scripts/preset-clash-core.sh $CLASH_KERNEL
+    status 下载openchash运行内核
+}
 
 # 开始下载zsh终端工具
 BEGIN_TIME=$(date '+%H:%M:%S')
 chmod +x $GITHUB_WORKSPACE/scripts/preset-terminal-tools.sh
-$GITHUB_WORKSPACE/scripts/preset-terminal-tools.sh 1>/dev/null 2>&1
+$GITHUB_WORKSPACE/scripts/preset-terminal-tools.sh
 status 下载zsh终端工具
 
 # 开始下载adguardhome运行内核
-BEGIN_TIME=$(date '+%H:%M:%S')
-chmod +x $GITHUB_WORKSPACE/scripts/preset-adguard-core.sh
-$GITHUB_WORKSPACE/scripts/preset-adguard-core.sh $CLASH_KERNEL 1>/dev/null 2>&1
-status 下载adguardhome运行内核
+[ $CLASH_KERNEL ] && {
+    BEGIN_TIME=$(date '+%H:%M:%S')
+    chmod +x $GITHUB_WORKSPACE/scripts/preset-adguard-core.sh
+    $GITHUB_WORKSPACE/scripts/preset-adguard-core.sh $CLASH_KERNEL
+    status 下载adguardhome运行内核
+}
 
 # 开始更新配置文件
 BEGIN_TIME=$(date '+%H:%M:%S')
@@ -250,3 +264,5 @@ make defconfig 1>/dev/null 2>&1
 status 更新配置文件
 
 echo -e "$(color cy 当前编译机型) $(color cb $SOURCE_REPO-${REPO_BRANCH#*-}-$DEVICE_TARGET-$DEVICE_SUBTARGET-$KERNEL_VERSION)"
+
+echo -e "\e[1;35m脚本运行完成！\e[0m"
