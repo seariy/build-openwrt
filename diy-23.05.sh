@@ -214,7 +214,6 @@ sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.//g' package/base-files/files/etc/sh
 
 # 设置固件版本头
 sed -i "s/ImmortalWrt /Seariy0 build /g" package/base-files/files/etc/openwrt_release
-sed -i "s/ImmortalWrt /Seariy1 build /g" package/base-files/luci2/bin/config_generate
 
 # 更改 Argon 主题背景
 cp -f $GITHUB_WORKSPACE/images/bg1.jpg feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
