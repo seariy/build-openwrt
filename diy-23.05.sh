@@ -164,7 +164,7 @@ git_clone https://github.com/jerrykuku/luci-theme-argon
 # clone_all https://github.com/morytyann/OpenWrt-mihomo
 
 # MosDNS
-# clone_all https://github.com/sbwml/luci-app-mosdns
+clone_all https://github.com/sbwml/luci-app-mosdns
 
 # Alist
 # clone_all https://github.com/sbwml/luci-app-alist
@@ -173,8 +173,8 @@ git_clone https://github.com/jerrykuku/luci-theme-argon
 git_clone https://github.com/sbwml/packages_lang_golang golang
 
 # iStore
-# clone_all https://github.com/linkease/istore-ui
-# clone_all https://github.com/linkease/istore luci
+clone_all https://github.com/linkease/istore-ui
+clone_all https://github.com/linkease/istore luci
 
 # Wrtbwmon
 clone_all https://github.com/brvphoenix/luci-app-wrtbwmon
@@ -186,14 +186,27 @@ BEGIN_TIME=$(date '+%H:%M:%S')
 # 修改默认IP
 sed -i 's/192.168.1.1/192.168.10.254/g' package/base-files/files/bin/config_generate
 
+cat >> $ZZZ <<-EOF
+# 设置旁路由模式
+uci set network.lan.gateway='192.168.10.1'                     # 旁路由设置 IPv4 网关
+uci set network.lan.dns='223.5.5.5 8.8.8.8'            # 旁路由设置 DNS(多个DNS要用空格分开)
+uci set dhcp.lan.ignore='1'                                  # 旁路由关闭DHCP功能
+uci delete network.lan.type                                  # 旁路由桥接模式-禁用
+
+EOF
+
+# 修改默认主机名 OpenWrt
+sed -i 's#ImmortalWrt#OpenWrt#g' package/base-files/files/bin/config_generate
+
 # 更改默认 Shell 为 zsh
 # sed -i 's/\/bin\/ash/\/usr\/bin\/zsh/g' package/base-files/files/etc/passwd
 
 # TTYD 免登录
 sed -i 's|/bin/login|/bin/login -f root|g' feeds/packages/utils/ttyd/files/ttyd.config
 
-# 设置 root 用户密码为 password
-sed -i 's/root:::0:99999:7:::/root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.::0:99999:7:::/g' package/base-files/files/etc/shadow
+# 设置 root 用户密码为 空 password
+sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.//g' package/base-files/files/etc/shadow
+sed -i "s/ImmortalWrt /Seariy build /g" package/base-files/files/etc/shadow
 
 # 更改 Argon 主题背景
 cp -f $GITHUB_WORKSPACE/images/bg1.jpg feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
@@ -222,10 +235,10 @@ sed -i 's/system/status/g' feeds/luci/applications/luci-app-netdata/luasrc/contr
 sed -i '3a \		"order": 10,' feeds/luci/applications/luci-app-ttyd/root/usr/share/luci/menu.d/luci-app-ttyd.json
 sed -i 's/\"终端\"/\"TTYD 终端\"/g' feeds/luci/applications/luci-app-ttyd/po/zh_Hans/ttyd.po
 
-# 设置 nlbwmon 独立菜单
-sed -i 's/services\/nlbw/nlbw/g; /path/s/admin\///g' feeds/luci/applications/luci-app-nlbwmon/root/usr/share/luci/menu.d/luci-app-nlbwmon.json
-sed -i 's/services\///g' feeds/luci/applications/luci-app-nlbwmon/htdocs/luci-static/resources/view/nlbw/config.js
-status 加载个人设置
+## 设置 nlbwmon 独立菜单
+#sed -i 's/services\/nlbw/nlbw/g; /path/s/admin\///g' feeds/luci/applications/luci-app-nlbwmon/root/usr/share/luci/menu.d/luci-app-nlbwmon.json
+#sed -i 's/services\///g' feeds/luci/applications/luci-app-nlbwmon/htdocs/luci-static/resources/view/nlbw/config.js
+#status 加载个人设置
 
 # 开始下载openchash运行内核
 #[ $CLASH_KERNEL ] && {
@@ -254,6 +267,6 @@ BEGIN_TIME=$(date '+%H:%M:%S')
 make defconfig 1>/dev/null 2>&1
 status 更新配置文件
 
-echo -e "$(color cy 当前编译机型) $(color Seariy $SOURCE_REPO-${REPO_BRANCH#*-}-$DEVICE_TARGET-$DEVICE_SUBTARGET-$KERNEL_VERSION)"
+echo -e "$(color cy 当前编译机型) $(color cb $SOURCE_REPO-${REPO_BRANCH#*-}-$DEVICE_TARGET-$DEVICE_SUBTARGET-$KERNEL_VERSION)"
 
 echo -e "\e[1;35m脚本运行完成！\e[0m"
