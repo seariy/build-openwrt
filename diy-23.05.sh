@@ -173,8 +173,8 @@ clone_all https://github.com/sbwml/luci-app-mosdns
 git_clone https://github.com/sbwml/packages_lang_golang golang
 
 # iStore
-clone_all https://github.com/linkease/istore-ui
-clone_all https://github.com/linkease/istore luci
+# clone_all https://github.com/linkease/istore-ui
+# clone_all https://github.com/linkease/istore luci
 
 # Wrtbwmon
 clone_all https://github.com/brvphoenix/luci-app-wrtbwmon
@@ -206,6 +206,8 @@ sed -i 's|/bin/login|/bin/login -f root|g' feeds/packages/utils/ttyd/files/ttyd.
 
 # 设置 root 用户密码为 空 password
 sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.//g' package/base-files/files/etc/shadow
+
+# 设置固件版本头
 sed -i "s/ImmortalWrt /Seariy build /g" package/base-files/files/etc/shadow
 
 # 更改 Argon 主题背景
