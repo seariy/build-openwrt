@@ -11,7 +11,7 @@ env:
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   UPLOAD_BIN_DIR: false
-  UPLOAD_ARTIFACT: false
+  UPLOAD_ARTIFACT: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
 
