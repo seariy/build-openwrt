@@ -187,7 +187,7 @@ BEGIN_TIME=$(date '+%H:%M:%S')
 sed -i 's/192.168.1.1/192.168.10.254/g' package/base-files/files/bin/config_generate
 
 ######## 修改默认 网关、DNS########
-ZZZ="openwrt/package/base-files/files/bin/config_generate"
+ZZZ="package/base-files/files/bin/config_generate"
 ########
 cat >> $ZZZ <<-EOF
 # 设置旁路由模式
