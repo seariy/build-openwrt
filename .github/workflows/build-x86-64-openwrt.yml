@@ -208,12 +208,5 @@ jobs:
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         body: |
           **This is OpenWrt Firmware for ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}**
-          ### 📒 固件信息
-          - 💻 平台架构: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
-          - ⚽ 固件源码: ${{ env.REPO_URL }}
-          - 💝 源码分支: ${{ env.REPO_BRANCH }}
-          - 🌐 默认地址: ${{ env.DEFAULT_IP }}
-          - 🔑 默认密码: password
-
-          - ${{ env.COMMIT_DATE }}
+          #########-- 📒 -- 💻 -- ⚽ -- 💝 -- 🌐 -- 🔑 -- #########
 
