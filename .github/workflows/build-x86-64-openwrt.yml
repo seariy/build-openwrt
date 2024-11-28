@@ -203,7 +203,7 @@ jobs:
         name: ${{ env.DATE }} for OpenWRT_${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
         allowUpdates: true
         removeArtifacts: true
-        tag: OpenWrt_x86-64_Seariy${{ env.RELEASE_TAG }}
+        tag: OpenWrt_${{ env.RELEASE_TAG }}
         token: ${{ secrets.SEARIY_TOKEN }}
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         body: |
