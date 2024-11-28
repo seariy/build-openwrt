@@ -16,6 +16,6 @@ sed -i "s/DISTRIB_REVISION=.*/DISTRIB_REVISION=''/g" /etc/openwrt_release
 repo=$(cat /etc/openwrt_release | grep DISTRIB_DESCRIPTION= | awk -F "'" '{print $2}' | awk '{print $1}')
 sed -i "s/DISTRIB_DESCRIPTION=.*/DISTRIB_DESCRIPTION='Seariy$repo R$(date +%y.%m.%d)'/g" /etc/openwrt_release
 sed -i "s/DISTRIB_RELEASE=.*/DISTRIB_DESCRIPTION='23.05.4'/g" /etc/openwrt_release
-# sed -i "s/DISTRIB_ID=.*/DISTRIB_ID='Seariy-Wrt'/g" /etc/openwrt_release
+sed -i "s/DISTRIB_ID=.*/DISTRIB_ID='Seariy'/g" /etc/openwrt_release
 
 exit 0
