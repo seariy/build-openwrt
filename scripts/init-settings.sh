@@ -13,8 +13,9 @@ uci commit luci
 
 # Set etc/openwrt_release
 sed -i "s/DISTRIB_REVISION=.*/DISTRIB_REVISION='r28061'/g" /etc/openwrt_release
-repo=$(cat /etc/openwrt_release | grep DISTRIB_DESCRIPTION= | awk -F "'" '{print $2}' | awk '{print $1}')
-sed -i "s/DISTRIB_DESCRIPTION=ImmortalWrt.*/DISTRIB_DESCRIPTION='Seariy $repo R$(date +%y.%m.%d)'/g" /etc/openwrt_release
+# repo=$(cat /etc/openwrt_release | grep DISTRIB_DESCRIPTION= | awk -F "'" '{print $2}' | awk '{print $1}')
+repo=$(cat /etc/openwrt_release | awk -F "'" '{print $2}' | awk '{print $1}')
+sed -i "s/DISTRIB_DESCRIPTION=.*/DISTRIB_DESCRIPTION='Seariy $repo R$(date +%y.%m.%d)'/g" /etc/openwrt_release
 sed -i "s/DISTRIB_RELEASE=.*/DISTRIB_RELEASE='Seariy'/g" /etc/openwrt_release
 sed -i "s/DISTRIB_ID=.*/DISTRIB_ID='openwrt'/g" /etc/openwrt_release
 
